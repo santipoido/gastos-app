@@ -38,16 +38,35 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader><CardTitle>Gasto por categoría (mes actual)</CardTitle></CardHeader>
-        <CardContent className="space-y-1">
-          {data.categoryBreakdown.map((c) => (
-            <div key={c.categoryId} className="flex justify-between text-sm">
-              <span className="flex items-center gap-2">
-                <CategoryDot color={c.categoryColor} />
-                {c.categoryName}
-              </span>
-              <span>{formatCurrency(c.total)}</span>
-            </div>
-          ))}
+        <CardContent className="space-y-3">
+          {data.categoryBreakdown.length === 0 && (
+            <p className="text-sm text-muted-foreground">Sin gastos este mes.</p>
+          )}
+          {data.categoryBreakdown.map((c) => {
+            const max = data.categoryBreakdown[0].total;
+            const pct = max > 0 ? (c.total / max) * 100 : 0;
+            return (
+              <div key={c.categoryId} className="flex items-center gap-3">
+                <span className="flex w-24 shrink-0 items-center gap-2 truncate text-sm">
+                  <CategoryDot color={c.categoryColor} />
+                  {c.categoryName}
+                </span>
+                <div className="h-2 flex-1 bg-muted" style={{ borderRadius: '0 4px 4px 0' }}>
+                  <div
+                    className="h-2"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: c.categoryColor ?? 'var(--muted-foreground)',
+                      borderRadius: '0 4px 4px 0',
+                    }}
+                  />
+                </div>
+                <span className="w-20 shrink-0 text-right text-xs text-muted-foreground [font-variant-numeric:tabular-nums]">
+                  {formatCurrency(c.total)}
+                </span>
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 

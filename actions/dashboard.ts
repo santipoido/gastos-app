@@ -48,10 +48,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     existing.total += Number(t.amount);
     breakdownMap.set(t.category_id, existing);
   }
-  const categoryBreakdown = Array.from(breakdownMap.entries()).map(([categoryId, v]) => ({
-    categoryId,
-    ...v,
-  }));
+  const categoryBreakdown = Array.from(breakdownMap.entries())
+    .map(([categoryId, v]) => ({ categoryId, ...v }))
+    .sort((a, b) => b.total - a.total);
 
   const monthsAhead = 3;
   const projectionEnd = addMonthsToYearMonth(currentYearMonth, monthsAhead);
