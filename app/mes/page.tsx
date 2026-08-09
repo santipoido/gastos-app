@@ -2,6 +2,7 @@ import { getMonthTransactions, toggleTransactionPaid, confirmVirtualRecurring, t
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatYearMonth, addMonthsToYearMonth } from '@/lib/billing';
+import { formatCurrency } from '@/lib/format';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -44,7 +45,7 @@ function Row({ t, yearMonth }: { t: MonthItem; yearMonth: string }) {
           {t.kind === 'virtual' ? ' (estimado)' : ''}
         </p>
       </div>
-      <span className="shrink-0 text-sm font-medium text-expense">${t.amount.toFixed(2)}</span>
+      <span className="shrink-0 text-sm font-medium text-expense">{formatCurrency(t.amount)}</span>
     </div>
   );
 }
@@ -66,6 +67,8 @@ export default async function MesPage({
   const transactions = await getMonthTransactions(yearMonth);
   const pending = transactions.filter((t) => !t.paid);
   const paid = transactions.filter((t) => t.paid);
+  const pendingTotal = pending.reduce((sum, t) => sum + t.amount, 0);
+  const paidTotal = paid.reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="mx-auto max-w-lg space-y-6 p-4">
@@ -87,6 +90,21 @@ export default async function MesPage({
         >
           <ChevronRight className="size-4" />
         </Button>
+      </div>
+
+      <div className="flex gap-4">
+        <Card className="flex-1">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Pendiente</p>
+            <p className="text-lg font-semibold text-expense">{formatCurrency(pendingTotal)}</p>
+          </CardContent>
+        </Card>
+        <Card className="flex-1">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Pagado</p>
+            <p className="text-lg font-semibold">{formatCurrency(paidTotal)}</p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
