@@ -59,6 +59,13 @@ export default async function MovimientosPage({
                   {t.type === 'income' ? '+' : '-'}
                   {formatCurrency(Number(t.amount))}
                 </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  render={<Link href={`/movimientos/${t.id}/editar`} />}
+                >
+                  Editar
+                </Button>
                 <ConfirmDeleteButton
                   action={deleteTransaction.bind(null, t.id)}
                   confirmText="¿Borrar este movimiento?"

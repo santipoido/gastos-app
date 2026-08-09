@@ -116,6 +116,13 @@ export async function listTransactions(filters?: {
   return data;
 }
 
+export async function getTransaction(id: string): Promise<Transaction> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.from('transactions').select('*').eq('id', id).single();
+  if (error) throw error;
+  return data;
+}
+
 function addMonthPrefix(yearMonth: string): string {
   const [y, m] = yearMonth.split('-').map(Number);
   const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`;
@@ -128,6 +135,7 @@ export async function deleteTransaction(id: string) {
   if (error) throw error;
   revalidatePath('/movimientos');
   revalidatePath('/dashboard');
+  revalidatePath('/mes');
 }
 
 export async function updateTransaction(id: string, formData: FormData) {
@@ -144,4 +152,5 @@ export async function updateTransaction(id: string, formData: FormData) {
   if (error) throw error;
   revalidatePath('/movimientos');
   revalidatePath('/dashboard');
+  revalidatePath('/mes');
 }
