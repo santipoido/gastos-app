@@ -1,21 +1,26 @@
-import { getMonthTransactions, toggleTransactionPaid, type MonthTransaction } from '@/actions/month';
+import { getMonthTransactions, toggleTransactionPaid, confirmVirtualRecurring, type MonthItem } from '@/actions/month';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatYearMonth, addMonthsToYearMonth } from '@/lib/billing';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
-const sourceLabel: Record<MonthTransaction['source'], string> = {
+const sourceLabel: Record<MonthItem['source'], string> = {
   manual: 'Efectivo',
   installment: 'Tarjeta',
   recurring: 'Recurrente',
 };
 
-function Row({ t }: { t: MonthTransaction }) {
+function Row({ t, yearMonth }: { t: MonthItem; yearMonth: string }) {
   const locked = t.source === 'manual';
+  const toggleAction =
+    t.kind === 'virtual'
+      ? confirmVirtualRecurring.bind(null, t.templateId as string, yearMonth)
+      : toggleTransactionPaid.bind(null, t.id as string, !t.paid);
+
   return (
     <div className="flex items-center gap-3 px-6 py-3">
-      <form action={toggleTransactionPaid.bind(null, t.id, !t.paid)}>
+      <form action={toggleAction}>
         <Button
           type="submit"
           variant={t.paid ? 'default' : 'outline'}
@@ -36,9 +41,10 @@ function Row({ t }: { t: MonthTransaction }) {
         <p className="truncate text-xs text-muted-foreground">
           {new Date(t.date + 'T00:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })} ·{' '}
           {sourceLabel[t.source]}
+          {t.kind === 'virtual' ? ' (estimado)' : ''}
         </p>
       </div>
-      <span className="shrink-0 text-sm font-medium text-expense">${Number(t.amount).toFixed(2)}</span>
+      <span className="shrink-0 text-sm font-medium text-expense">${t.amount.toFixed(2)}</span>
     </div>
   );
 }
@@ -89,7 +95,7 @@ export default async function MesPage({
           {pending.length === 0 && (
             <p className="px-6 py-3 text-sm text-muted-foreground">Nada pendiente este mes.</p>
           )}
-          {pending.map((t) => <Row key={t.id} t={t} />)}
+          {pending.map((t) => <Row key={t.key} t={t} yearMonth={yearMonth} />)}
         </CardContent>
       </Card>
 
@@ -99,7 +105,7 @@ export default async function MesPage({
           {paid.length === 0 && (
             <p className="px-6 py-3 text-sm text-muted-foreground">Todavía no confirmaste ningún pago este mes.</p>
           )}
-          {paid.map((t) => <Row key={t.id} t={t} />)}
+          {paid.map((t) => <Row key={t.key} t={t} yearMonth={yearMonth} />)}
         </CardContent>
       </Card>
     </div>
