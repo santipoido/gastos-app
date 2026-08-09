@@ -1,4 +1,5 @@
 import { listCategories, deleteCategory } from '@/actions/categories';
+import { CategoryDot } from '@/components/category-dot';
 import { CategoryForm } from '@/components/category-form';
 import { ConfirmDeleteButton } from '@/components/confirm-delete-button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ export default async function CategoriasPage() {
           {categories.map((c) => (
             <div key={c.id} className="flex items-center justify-between gap-2 px-6 py-3">
               <span className="flex items-center gap-2 text-sm font-medium">
+                <CategoryDot color={c.color} />
                 {c.name} <Badge variant="secondary">{c.type === 'income' ? 'Ingreso' : 'Gasto'}</Badge>
               </span>
               <ConfirmDeleteButton

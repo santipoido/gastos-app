@@ -1,6 +1,7 @@
 import { listTransactions, deleteTransaction } from '@/actions/transactions';
 import { listCategories } from '@/actions/categories';
 import { listCards } from '@/actions/cards';
+import { CategoryDot } from '@/components/category-dot';
 import { ConfirmDeleteButton } from '@/components/confirm-delete-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +19,7 @@ export default async function MovimientosPage({
     listCategories(),
     listCards(),
   ]);
-  const categoryById = new Map(categories.map((c) => [c.id, c.name]));
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4">
@@ -45,8 +46,9 @@ export default async function MovimientosPage({
           {transactions.map((t) => (
             <div key={t.id} className="flex items-center justify-between gap-3 px-6 py-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
-                  {categoryById.get(t.category_id) ?? 'Sin categoría'}
+                <p className="flex items-center gap-2 truncate text-sm font-medium">
+                  <CategoryDot color={categoryById.get(t.category_id)?.color ?? null} />
+                  {categoryById.get(t.category_id)?.name ?? 'Sin categoría'}
                   {t.installment_total && t.installment_total > 1 ? ` (cuota ${t.installment_number}/${t.installment_total})` : ''}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">

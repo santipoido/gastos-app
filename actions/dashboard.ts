@@ -8,7 +8,7 @@ import { formatYearMonth, addMonthsToYearMonth } from '@/lib/billing';
 export interface DashboardData {
   currentMonthIncome: number;
   currentMonthExpense: number;
-  categoryBreakdown: { categoryId: string; categoryName: string; total: number }[];
+  categoryBreakdown: { categoryId: string; categoryName: string; categoryColor: string | null; total: number }[];
   projection: { yearMonth: string; total: number }[];
   upcoming: { date: string; description: string; amount: number }[];
 }
@@ -24,7 +24,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   const { data: currentMonthTx, error: currentError } = await supabase
     .from('transactions')
-    .select('type, amount, category_id, categories(name)')
+    .select('type, amount, category_id, categories(name, color)')
     .eq('paid', true)
     .gte('date', monthStart)
     .lt('date', nextMonthStart);
@@ -37,10 +37,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const breakdownMap = new Map<string, { categoryName: string; total: number }>();
+  const breakdownMap = new Map<string, { categoryName: string; categoryColor: string | null; total: number }>();
   for (const t of currentMonthTx.filter((t) => t.type === 'expense')) {
-    const categoryName = (t.categories as unknown as { name: string } | null)?.name ?? 'Sin categoría';
-    const existing = breakdownMap.get(t.category_id) ?? { categoryName, total: 0 };
+    const category = t.categories as unknown as { name: string; color: string | null } | null;
+    const existing = breakdownMap.get(t.category_id) ?? {
+      categoryName: category?.name ?? 'Sin categoría',
+      categoryColor: category?.color ?? null,
+      total: 0,
+    };
     existing.total += Number(t.amount);
     breakdownMap.set(t.category_id, existing);
   }

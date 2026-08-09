@@ -12,6 +12,7 @@ export interface MonthItem {
   id: string | null;
   templateId: string | null;
   category_name: string;
+  category_color: string | null;
   description: string | null;
   date: string;
   amount: number;
@@ -31,31 +32,35 @@ export async function getMonthTransactions(yearMonth?: string): Promise<MonthIte
 
   const { data: rows, error } = await supabase
     .from('transactions')
-    .select('*, categories(name)')
+    .select('*, categories(name, color)')
     .eq('type', 'expense')
     .gte('date', monthStart)
     .lt('date', nextMonthStart)
     .order('date');
   if (error) throw error;
 
-  const real: MonthItem[] = rows.map((t) => ({
-    key: t.id,
-    kind: 'real',
-    id: t.id,
-    templateId: t.recurring_template_id,
-    category_name: (t.categories as unknown as { name: string } | null)?.name ?? 'Sin categoría',
-    description: t.description,
-    date: t.date,
-    amount: Number(t.amount),
-    paid: t.paid,
-    source: t.source,
-    installment_number: t.installment_number,
-    installment_total: t.installment_total,
-  }));
+  const real: MonthItem[] = rows.map((t) => {
+    const category = t.categories as unknown as { name: string; color: string | null } | null;
+    return {
+      key: t.id,
+      kind: 'real',
+      id: t.id,
+      templateId: t.recurring_template_id,
+      category_name: category?.name ?? 'Sin categoría',
+      category_color: category?.color ?? null,
+      description: t.description,
+      date: t.date,
+      amount: Number(t.amount),
+      paid: t.paid,
+      source: t.source,
+      installment_number: t.installment_number,
+      installment_total: t.installment_total,
+    };
+  });
 
   const { data: templates, error: templatesError } = await supabase
     .from('recurring_templates')
-    .select('*, categories(name)')
+    .select('*, categories(name, color)')
     .eq('active', true);
   if (templatesError) throw templatesError;
 
@@ -79,12 +84,14 @@ export async function getMonthTransactions(yearMonth?: string): Promise<MonthIte
 
   const virtual: MonthItem[] = virtualOccurrences.map((o) => {
     const template = templates.find((t) => t.id === o.templateId)!;
+    const category = template.categories as unknown as { name: string; color: string | null } | null;
     return {
       key: `virtual-${o.templateId}-${targetYearMonth}`,
       kind: 'virtual',
       id: null,
       templateId: o.templateId,
-      category_name: (template.categories as unknown as { name: string } | null)?.name ?? 'Sin categoría',
+      category_name: category?.name ?? 'Sin categoría',
+      category_color: category?.color ?? null,
       description: o.name,
       date: o.date.toISOString().slice(0, 10),
       amount: o.amount,

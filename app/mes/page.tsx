@@ -1,4 +1,5 @@
 import { getMonthTransactions, toggleTransactionPaid, confirmVirtualRecurring, type MonthItem } from '@/actions/month';
+import { CategoryDot } from '@/components/category-dot';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatYearMonth, addMonthsToYearMonth } from '@/lib/billing';
@@ -33,7 +34,8 @@ function Row({ t, yearMonth }: { t: MonthItem; yearMonth: string }) {
         </Button>
       </form>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
+        <p className="flex items-center gap-2 truncate text-sm font-medium">
+          <CategoryDot color={t.category_color} />
           {t.category_name}
           {t.installment_total && t.installment_total > 1
             ? ` (cuota ${t.installment_number}/${t.installment_total})`

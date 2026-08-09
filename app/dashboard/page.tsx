@@ -1,4 +1,5 @@
 import { getDashboardData } from '@/actions/dashboard';
+import { CategoryDot } from '@/components/category-dot';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
 
@@ -40,7 +41,10 @@ export default async function DashboardPage() {
         <CardContent className="space-y-1">
           {data.categoryBreakdown.map((c) => (
             <div key={c.categoryId} className="flex justify-between text-sm">
-              <span>{c.categoryName}</span>
+              <span className="flex items-center gap-2">
+                <CategoryDot color={c.categoryColor} />
+                {c.categoryName}
+              </span>
               <span>{formatCurrency(c.total)}</span>
             </div>
           ))}
