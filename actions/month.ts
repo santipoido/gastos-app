@@ -1,6 +1,7 @@
 'use server';
 
 import { createServerSupabase } from '@/lib/supabase/server';
+import { generatePendingRecurring } from '@/actions/recurring';
 import { formatYearMonth, addMonthsToYearMonth } from '@/lib/billing';
 import { revalidatePath } from 'next/cache';
 import type { Transaction } from '@/lib/types';
@@ -10,6 +11,8 @@ export interface MonthTransaction extends Transaction {
 }
 
 export async function getMonthTransactions(): Promise<MonthTransaction[]> {
+  await generatePendingRecurring();
+
   const supabase = await createServerSupabase();
   const currentYearMonth = formatYearMonth(new Date());
   const monthStart = `${currentYearMonth}-01`;
