@@ -10,13 +10,13 @@ export interface MonthTransaction extends Transaction {
   category_name: string;
 }
 
-export async function getMonthTransactions(): Promise<MonthTransaction[]> {
+export async function getMonthTransactions(yearMonth?: string): Promise<MonthTransaction[]> {
   await generatePendingRecurring();
 
   const supabase = await createServerSupabase();
-  const currentYearMonth = formatYearMonth(new Date());
-  const monthStart = `${currentYearMonth}-01`;
-  const nextMonthStart = `${addMonthsToYearMonth(currentYearMonth, 1)}-01`;
+  const targetYearMonth = yearMonth ?? formatYearMonth(new Date());
+  const monthStart = `${targetYearMonth}-01`;
+  const nextMonthStart = `${addMonthsToYearMonth(targetYearMonth, 1)}-01`;
 
   const { data, error } = await supabase
     .from('transactions')
