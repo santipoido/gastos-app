@@ -33,6 +33,21 @@ export async function createRecurringTemplate(formData: FormData) {
   revalidatePath('/recurrentes');
 }
 
+export async function updateRecurringTemplate(id: string, formData: FormData) {
+  const supabase = await createServerSupabase();
+  const { error } = await supabase
+    .from('recurring_templates')
+    .update({
+      name: formData.get('name') as string,
+      category_id: formData.get('category_id') as string,
+      amount_estimate: Number(formData.get('amount_estimate')),
+      day_of_month: Number(formData.get('day_of_month')),
+    })
+    .eq('id', id);
+  if (error) throw error;
+  revalidatePath('/recurrentes');
+}
+
 export async function pauseRecurringTemplate(id: string) {
   const supabase = await createServerSupabase();
   const { error } = await supabase
