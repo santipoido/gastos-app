@@ -24,6 +24,4 @@ Importar el repo en Vercel, configurar las mismas dos variables de entorno, depl
 - `lib/recurring.ts` — generación lazy de gastos recurrentes y proyección de próximos meses.
 - `actions/` — Server Actions (única capa de mutaciones, sin API REST separada).
 - `app/` — páginas (dashboard, movimientos, recurrentes, tarjetas, categorías, login).
-- `supabase/migrations/0001_init.sql` — schema completo + RLS.
-- `supabase/migrations/0002_transactions_paid.sql` — columna `paid` para confirmar pagos de tarjeta/recurrentes.
-- `supabase/migrations/0003_backfill_paid_pending.sql` — corrige a pendiente las cuotas/recurrentes ya cargadas con fecha hoy o futura.
+- `supabase/migrations/0001_init.sql` — schema completo + RLS (incluye columna `paid` para confirmar pagos de tarjeta/recurrentes).
