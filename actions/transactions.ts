@@ -84,7 +84,7 @@ export async function createTransaction(formData: FormData) {
       installment_number: line.installmentNumber,
       installment_total: line.installmentTotal,
       source: 'installment' as const,
-      paid: isPaidByDefault('installment'),
+      paid: type === 'income' ? true : isPaidByDefault('installment'),
     }));
 
     const { error } = await supabase.from('transactions').insert(rows);
