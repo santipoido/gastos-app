@@ -6,6 +6,7 @@ import { ConfirmDeleteButton } from '@/components/confirm-delete-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/format';
+import { Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function MovimientosPage({
@@ -28,17 +29,17 @@ export default async function MovimientosPage({
         <Link href="/movimientos/nuevo"><Button>Nuevo</Button></Link>
       </div>
 
-      <form className="flex gap-2 text-sm" method="get">
-        <select name="categoryId" defaultValue={filters.categoryId ?? ''} className="rounded border p-1">
+      <form className="grid grid-cols-2 gap-2 text-sm sm:flex sm:flex-wrap" method="get">
+        <select name="categoryId" defaultValue={filters.categoryId ?? ''} className="w-full rounded border p-1 sm:w-auto">
           <option value="">Todas las categorías</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <select name="cardId" defaultValue={filters.cardId ?? ''} className="rounded border p-1">
+        <select name="cardId" defaultValue={filters.cardId ?? ''} className="w-full rounded border p-1 sm:w-auto">
           <option value="">Todas las tarjetas</option>
           {cards.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input name="yearMonth" type="month" defaultValue={filters.yearMonth ?? ''} className="rounded border p-1" />
-        <Button type="submit" variant="outline" size="sm">Filtrar</Button>
+        <input name="yearMonth" type="month" defaultValue={filters.yearMonth ?? ''} className="w-full rounded border p-1 sm:w-auto" />
+        <Button type="submit" variant="outline" size="sm" className="col-span-2 w-full sm:col-span-1 sm:w-auto">Filtrar</Button>
       </form>
 
       <Card>
@@ -63,15 +64,20 @@ export default async function MovimientosPage({
                 </span>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   render={<Link href={`/movimientos/${t.id}/editar`} />}
                 >
-                  Editar
+                  <Pencil />
+                  <span className="sr-only">Editar</span>
                 </Button>
                 <ConfirmDeleteButton
                   action={deleteTransaction.bind(null, t.id)}
                   confirmText="¿Borrar este movimiento?"
-                />
+                  size="icon-sm"
+                >
+                  <Trash2 />
+                  <span className="sr-only">Borrar</span>
+                </ConfirmDeleteButton>
               </div>
             </div>
           ))}
