@@ -12,15 +12,26 @@ import Link from 'next/link';
 export default async function MovimientosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categoryId?: string; cardId?: string; yearMonth?: string }>;
+  searchParams: Promise<{ categoryId?: string; cardId?: string; yearMonth?: string; page?: string }>;
 }) {
   const filters = await searchParams;
-  const [transactions, categories, cards] = await Promise.all([
-    listTransactions(filters),
+  const page = Math.max(1, Number(filters.page) || 1);
+  const [{ transactions, hasNext }, categories, cards] = await Promise.all([
+    listTransactions({ ...filters, page }),
     listCategories(),
     listCards(),
   ]);
   const categoryById = new Map(categories.map((c) => [c.id, c]));
+
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams();
+    if (filters.categoryId) params.set('categoryId', filters.categoryId);
+    if (filters.cardId) params.set('cardId', filters.cardId);
+    if (filters.yearMonth) params.set('yearMonth', filters.yearMonth);
+    if (p > 1) params.set('page', String(p));
+    const qs = params.toString();
+    return qs ? `/movimientos?${qs}` : '/movimientos';
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4">
@@ -83,6 +94,20 @@ export default async function MovimientosPage({
           ))}
         </CardContent>
       </Card>
+
+      <div className="flex items-center justify-between">
+        {page > 1 ? (
+          <Button variant="outline" size="sm" render={<Link href={pageHref(page - 1)} />}>Anterior</Button>
+        ) : (
+          <Button variant="outline" size="sm" disabled>Anterior</Button>
+        )}
+        <span className="text-sm text-muted-foreground">Página {page}</span>
+        {hasNext ? (
+          <Button variant="outline" size="sm" render={<Link href={pageHref(page + 1)} />}>Siguiente</Button>
+        ) : (
+          <Button variant="outline" size="sm" disabled>Siguiente</Button>
+        )}
+      </div>
     </div>
   );
 }

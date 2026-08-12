@@ -95,11 +95,14 @@ export async function createTransaction(formData: FormData) {
   revalidatePath('/dashboard');
 }
 
+const TRANSACTIONS_PAGE_SIZE = 20;
+
 export async function listTransactions(filters?: {
   categoryId?: string;
   cardId?: string;
   yearMonth?: string;
-}): Promise<Transaction[]> {
+  page?: number;
+}): Promise<{ transactions: Transaction[]; hasNext: boolean }> {
   const supabase = await createServerSupabase();
   let query = supabase.from('transactions').select('*').order('date', { ascending: false });
 
@@ -111,9 +114,13 @@ export async function listTransactions(filters?: {
       .lt('date', `${addMonthPrefix(filters.yearMonth)}-01`);
   }
 
+  const page = Math.max(1, filters?.page ?? 1);
+  const offset = (page - 1) * TRANSACTIONS_PAGE_SIZE;
+  query = query.range(offset, offset + TRANSACTIONS_PAGE_SIZE);
+
   const { data, error } = await query;
   if (error) throw error;
-  return data;
+  return { transactions: data.slice(0, TRANSACTIONS_PAGE_SIZE), hasNext: data.length > TRANSACTIONS_PAGE_SIZE };
 }
 
 export async function getTransaction(id: string): Promise<Transaction> {
